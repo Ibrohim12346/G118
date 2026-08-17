@@ -33,6 +33,8 @@
   font-size: 24px;
   font-weight: 800;
   letter-spacing: -1px;
+  text-decoration: none;
+  color: inherit;
 }
 
 .shop-logo span {

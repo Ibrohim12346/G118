@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import "./HomePage.css";
 import { Link } from "react-router-dom";
 
@@ -13,49 +14,21 @@ import {
   FaInstagram,
   FaLinkedinIn,
   FaPhoneAlt,
-  FaEnvelope,
+FaEnvelope,
   FaMapMarkerAlt,
   FaHeart,
   FaUser,
   FaCheck,
+  FaBars,
 } from "react-icons/fa";
 
-const products = [
-  {
-    image:
-      "https://images.unsplash.com/photo-1523381210434-271e8be1f52b",
-    title: "Premium Jacket",
-    category: "Winter Collection",
-    price: "$18.50",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f",
-    title: "Warm Winter Coat",
-    category: "Men Collection",
-    price: "$22.00",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1542291026-7eec264c27ff",
-    title: "Kids Collection",
-    category: "New Arrival",
-    price: "$15.90",
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1553062407-98eeb64c6a62",
-    title: "Premium Shoes",
-    category: "Footwear",
-    price: "$19.99",
-  },
-];
-
-const categories = [
-  "Men's Wear",
-  "Women's Wear",
-  "Kids' Wear",
-];
+import {
+  getProducts,
+  getCategories,
+  getReviews,
+  subscribe,
+} from "../api.js";
+import { getCartCount } from "../cart.js";
 
 const features = [
   {
@@ -75,31 +48,70 @@ const features = [
   },
 ];
 
-const reviews = [
-  {
-    name: "Ali Market",
-    text: "Very good quality products. Prices are also suitable for wholesale.",
-  },
-  {
-    name: "Fashion Store",
-    text: "Fast delivery and excellent customer service. Highly recommended.",
-  },
-  {
-    name: "Kids Shop",
-    text: "Products arrived safely and quality was better than expected.",
-  },
-];
+function formatPrice(price) {
+  return `$${Number(price).toFixed(2)}`;
+}
 
 function HomePage() {
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [customerReviews, setCustomerReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [email, setEmail] = useState("");
+  const [subStatus, setSubStatus] = useState(null);
+  const [cartCount, setCartCount] = useState(getCartCount());
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [productData, categoryData, reviewData] = await Promise.all([
+          getProducts({ featured: "true" }),
+          getCategories(),
+          getReviews(),
+        ]);
+        setProducts(productData.results ?? productData);
+        setCategories(categoryData.results ?? categoryData);
+        setCustomerReviews(reviewData.results ?? reviewData);
+      } catch {
+        setError(
+          "Backend bilan bog'lanib bo'lmadi. Django serverini ishga tushiring."
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    const onCartUpdate = () => setCartCount(getCartCount());
+    window.addEventListener("cart-updated", onCartUpdate);
+    return () => window.removeEventListener("cart-updated", onCartUpdate);
+  }, []);
+
+  async function handleSubscribe(event) {
+    event.preventDefault();
+    setSubStatus(null);
+    try {
+      await subscribe(email);
+      setSubStatus("success");
+      setEmail("");
+    } catch {
+      setSubStatus("error");
+    }
+  }
+
   return (
     <div className="home-page">
 
       {/* HEADER */}
       <header className="header">
 
-        <div className="logo">
-          <span>Premium</span> Bulk
-        </div>
+        <Link to="/" className="logo">
+          <span>Premium</span> Store
+        </Link>
 
         <nav>
           <Link to="/">Home</Link>
@@ -118,17 +130,32 @@ function HomePage() {
             <FaUser />
           </button>
 
-          <button className="icon-btn cart-btn">
+          <Link to="/savat" className="icon-btn cart-btn">
             <FaShoppingCart />
 
             <span className="cart-count">
-              2
+              {cartCount}
             </span>
-          </button>
+          </Link>
 
         </div>
 
+        <button
+          className="menu-toggle"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-label="Menu"
+        >
+          <FaBars />
+        </button>
+
       </header>
+
+      <div className={`mobile-menu ${menuOpen ? "open" : ""}`}>
+        <Link to="/" onClick={() => setMenuOpen(false)}>Home</Link>
+        <Link to="/mahsulodlari" onClick={() => setMenuOpen(false)}>Products</Link>
+        <Link to="/shop" onClick={() => setMenuOpen(false)}>Shop</Link>
+        <Link to="/savat" onClick={() => setMenuOpen(false)}>Cart</Link>
+      </div>
 
       {/* HERO */}
       <section className="hero" id="home">
@@ -142,7 +169,7 @@ function HomePage() {
           </span>
 
           <h1>
-            Premium Bulk Apparel.
+            Premium Store Apparel.
             <br />
             Delivered at Scale.
           </h1>
@@ -160,10 +187,10 @@ function HomePage() {
               <FaArrowRight />
             </Link>
 
-            <Link to="/shop" className="secondary-btn">
+            <a href="#contact" className="secondary-btn">
               Contact Us
               <FaPhoneAlt />
-            </Link>
+            </a>
 
           </div>
 
@@ -215,7 +242,7 @@ function HomePage() {
           {categories.map((category, index) => (
             <div
               className={`category-card category-${index + 1}`}
-              key={index}
+              key={category.id ?? index}
             >
 
               <div className="category-overlay"></div>
@@ -227,13 +254,13 @@ function HomePage() {
                 </span>
 
                 <h3>
-                  {category}
+                  {category.name}
                 </h3>
 
-                <button>
+                <Link to="/shop">
                   Explore
                   <FaArrowRight />
-                </button>
+                </Link>
 
               </div>
 
@@ -264,26 +291,35 @@ function HomePage() {
 
           </div>
 
-          <button className="view-all">
+          <Link to="/shop" className="view-all">
             View All
             <FaArrowRight />
-          </button>
+          </Link>
 
         </div>
+
+        {error && <p className="api-error">{error}</p>}
+
+        {loading && <p className="loading-text">Loading products...</p>}
 
         <div className="product-grid">
 
           {products.map((product, index) => (
-            <div
+            <Link
+              to={`/mahsulodlari/${product.id}`}
               className="product-card"
-              key={index}
+              key={product.id ?? index}
             >
 
               <div className="product-image">
 
                 <img
-                  src={product.image}
+                  src={product.image_url || product.image}
                   alt={product.title}
+                  onError={(event) => {
+                    event.currentTarget.src =
+                      "https://images.unsplash.com/photo-1558769132-cb1aea458c5e";
+                  }}
                 />
 
                 <span className="badge">
@@ -308,14 +344,19 @@ function HomePage() {
 
                 <div className="product-rating">
 
-                  <FaStar />
-                  <FaStar />
-                  <FaStar />
-                  <FaStar />
-                  <FaStar />
+                  {Array.from({ length: 5 }).map((_, starIndex) => (
+                    <FaStar
+                      key={starIndex}
+                      className={
+                        starIndex < Math.round(product.rating ?? 5)
+                          ? "star active"
+                          : "star"
+                      }
+                    />
+                  ))}
 
                   <span>
-                    5.0
+                    {(product.rating ?? 5).toFixed(1)}
                   </span>
 
                 </div>
@@ -323,19 +364,19 @@ function HomePage() {
                 <div className="product-bottom">
 
                   <strong>
-                    {product.price}
+                    {formatPrice(product.wholesale_price ?? product.price)}
                   </strong>
 
-                  <button>
+                  <span className="view-btn">
                     View
                     <FaArrowRight />
-                  </button>
+                  </span>
 
                 </div>
 
               </div>
 
-            </div>
+            </Link>
           ))}
 
         </div>
@@ -362,19 +403,24 @@ function HomePage() {
 
         <div className="review-grid">
 
-          {reviews.map((review, index) => (
+          {customerReviews.map((review, index) => (
             <div
               className="review-card"
-              key={index}
+              key={review.id ?? index}
             >
 
               <div className="stars">
 
-                <FaStar />
-                <FaStar />
-                <FaStar />
-                <FaStar />
-                <FaStar />
+                {Array.from({ length: 5 }).map((_, starIndex) => (
+                  <FaStar
+                    key={starIndex}
+                    className={
+                      starIndex < Math.round(review.rating ?? 5)
+                        ? "active"
+                        : ""
+                    }
+                  />
+                ))}
 
               </div>
 
@@ -411,7 +457,7 @@ function HomePage() {
       </section>
 
       {/* CTA */}
-      <section className="cta">
+      <form className="cta" onSubmit={handleSubscribe}>
 
         <div className="cta-content">
 
@@ -439,29 +485,44 @@ function HomePage() {
 
             <input
               type="email"
+              required
               placeholder="Enter your email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
             />
 
           </div>
 
-          <button>
+          <button type="submit">
             Get Started
             <FaArrowRight />
           </button>
 
         </div>
 
-      </section>
+        {subStatus === "success" && (
+          <p className="sub-message success">
+            ✓ Obuna bo'ldingiz! Rahmat.
+          </p>
+        )}
+
+        {subStatus === "error" && (
+          <p className="sub-message error">
+            Xatolik yuz berdi. Qaytadan urinib ko'ring.
+          </p>
+        )}
+
+      </form>
 
       {/* FOOTER */}
-      <footer className="footer">
+      <footer className="footer" id="contact">
 
         <div className="footer-main">
 
           <div className="footer-about">
 
             <div className="footer-logo">
-              <span>Premium</span> Bulk
+              <span>Premium</span> Store
             </div>
 
             <p>
@@ -522,7 +583,7 @@ function HomePage() {
               Company
             </h3>
 
-            <a href="#about">
+            <a href="#products">
               About Us
             </a>
 
@@ -530,11 +591,11 @@ function HomePage() {
               Contact
             </a>
 
-            <a href="#">
+            <a href="#contact">
               Privacy Policy
             </a>
 
-            <a href="#">
+            <a href="#contact">
               Terms
             </a>
 
@@ -567,7 +628,7 @@ function HomePage() {
 
         <div className="copyright">
 
-          © 2026 Premium Bulk Apparel.
+          © 2026 Premium Store Apparel.
           All Rights Reserved.
 
         </div>

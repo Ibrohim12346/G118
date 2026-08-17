@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   FaShoppingCart,
   FaTrash,
@@ -15,33 +16,16 @@ import {
 
 import "./SavatPage.css";
 
-const initialProducts = [
-  {
-    id: 1,
-    title: "Premium Winter Jacket",
-    category: "Boys Collection",
-    size: "M",
-    color: "Black",
-    price: 25.5,
-    quantity: 1,
-    image:
-      "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500",
-  },
-  {
-    id: 2,
-    title: "Kids Fashion Hoodie",
-    category: "Winter Collection",
-    size: "L",
-    color: "Black",
-    price: 18.0,
-    quantity: 1,
-    image:
-      "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500",
-  },
-];
+import { createOrder } from "../api.js";
+import {
+  getCart,
+  updateQuantity,
+  removeFromCart,
+  clearCart,
+} from "../cart.js";
 
 export default function SavatPage() {
-  const [products, setProducts] = useState(initialProducts);
+  const [products, setProducts] = useState(getCart());
 
   const [shipping, setShipping] = useState({
     firstName: "",
@@ -54,32 +38,31 @@ export default function SavatPage() {
   });
 
   const [payment, setPayment] = useState("card");
+  const [placing, setPlacing] = useState(false);
+  const [orderMessage, setOrderMessage] = useState(null);
 
-  const increase = (id) => {
-    setProducts((items) =>
-      items.map((item) =>
-        item.id === id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      )
+  useEffect(() => {
+    const onCartUpdate = () => setProducts(getCart());
+    window.addEventListener("cart-updated", onCartUpdate);
+    return () => window.removeEventListener("cart-updated", onCartUpdate);
+  }, []);
+
+  const increase = (id, size) => {
+    const item = products.find(
+      (product) => product.id === id && product.size === size
     );
+    if (item) updateQuantity(id, size, item.quantity + 1);
   };
 
-  const decrease = (id) => {
-    setProducts((items) =>
-      items.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              quantity: Math.max(1, item.quantity - 1),
-            }
-          : item
-      )
+  const decrease = (id, size) => {
+    const item = products.find(
+      (product) => product.id === id && product.size === size
     );
+    if (item) updateQuantity(id, size, item.quantity - 1);
   };
 
-  const removeProduct = (id) => {
-    setProducts((items) => items.filter((item) => item.id !== id));
+  const removeProduct = (id, size) => {
+    removeFromCart(id, size);
   };
 
   const handleChange = (e) => {
@@ -98,15 +81,59 @@ export default function SavatPage() {
   const tax = subtotal * 0.05;
   const total = subtotal + shippingCost + tax;
 
+  async function handlePlaceOrder() {
+    if (products.length === 0) return;
+
+    if (
+      !shipping.firstName.trim() ||
+      !shipping.lastName.trim() ||
+      !shipping.address.trim() ||
+      !shipping.city.trim() ||
+      !shipping.phone.trim()
+    ) {
+      setOrderMessage("validation");
+      return;
+    }
+
+    setPlacing(true);
+    setOrderMessage(null);
+
+    try {
+      await createOrder({
+        full_name: `${shipping.firstName} ${shipping.lastName}`.trim(),
+        phone: shipping.phone,
+        address: [
+          shipping.address,
+          shipping.city,
+          shipping.region,
+          shipping.zip,
+        ]
+          .filter(Boolean)
+          .join(", "),
+        note: payment === "cash" ? "Cash on Delivery" : "Card payment",
+        items: products.map((product) => ({
+          product: product.id,
+          quantity: product.quantity,
+        })),
+      });
+      clearCart();
+      setOrderMessage("success");
+    } catch {
+      setOrderMessage("error");
+    } finally {
+      setPlacing(false);
+    }
+  }
+
   return (
     <div className="checkout-page">
 
       {/* HEADER */}
       <header className="checkout-header">
-        <div className="checkout-logo">
+        <Link to="/" className="checkout-logo">
           <FaShoppingCart />
-          <span>EBR GIMMING</span>
-        </div>
+          <span>Premium Store</span>
+        </Link>
 
         <div className="secure-checkout">
           <FaLock />
@@ -116,7 +143,9 @@ export default function SavatPage() {
 
       {/* PAGE TITLE */}
       <section className="checkout-title">
-        <span>Home / Cart</span>
+        <span>
+          <Link to="/">Home</Link> / Cart
+        </span>
         <h1>Checkout</h1>
         <p>Complete your order by providing your details below.</p>
       </section>
@@ -143,12 +172,15 @@ export default function SavatPage() {
                 <FaBoxOpen />
                 <h3>Your cart is empty</h3>
                 <p>Add some products to continue.</p>
+                <Link to="/shop" className="continue-shopping">
+                  Continue Shopping
+                </Link>
               </div>
             ) : (
               <div className="products-list">
 
                 {products.map((product) => (
-                  <div className="product-item" key={product.id}>
+                  <div className="product-item" key={`${product.id}-${product.size || "default"}`}>
 
                     <div className="product-image">
                       <img src={product.image} alt={product.title} />
@@ -163,11 +195,7 @@ export default function SavatPage() {
 
                       <div className="product-meta">
                         <span>
-                          Size: <b>{product.size}</b>
-                        </span>
-
-                        <span>
-                          Color: <b>{product.color}</b>
+                          Size: <b>{product.size || "-"}</b>
                         </span>
                       </div>
 
@@ -175,7 +203,7 @@ export default function SavatPage() {
 
                         <div className="quantity">
                           <button
-                            onClick={() => decrease(product.id)}
+                            onClick={() => decrease(product.id, product.size)}
                           >
                             <FaMinus />
                           </button>
@@ -183,7 +211,7 @@ export default function SavatPage() {
                           <span>{product.quantity}</span>
 
                           <button
-                            onClick={() => increase(product.id)}
+                            onClick={() => increase(product.id, product.size)}
                           >
                             <FaPlus />
                           </button>
@@ -192,7 +220,7 @@ export default function SavatPage() {
                         <button
                           className="delete-btn"
                           onClick={() =>
-                            removeProduct(product.id)
+                            removeProduct(product.id, product.size)
                           }
                         >
                           <FaTrash />
@@ -238,6 +266,7 @@ export default function SavatPage() {
                   type="text"
                   name="firstName"
                   placeholder="Enter first name"
+                  required
                   value={shipping.firstName}
                   onChange={handleChange}
                 />
@@ -249,6 +278,7 @@ export default function SavatPage() {
                   type="text"
                   name="lastName"
                   placeholder="Enter last name"
+                  required
                   value={shipping.lastName}
                   onChange={handleChange}
                 />
@@ -263,6 +293,7 @@ export default function SavatPage() {
                     type="text"
                     name="address"
                     placeholder="Street address"
+                    required
                     value={shipping.address}
                     onChange={handleChange}
                   />
@@ -275,6 +306,7 @@ export default function SavatPage() {
                   type="text"
                   name="city"
                   placeholder="City"
+                  required
                   value={shipping.city}
                   onChange={handleChange}
                 />
@@ -308,6 +340,7 @@ export default function SavatPage() {
                   type="tel"
                   name="phone"
                   placeholder="+998 90 000 00 00"
+                  required
                   value={shipping.phone}
                   onChange={handleChange}
                 />
@@ -435,24 +468,37 @@ export default function SavatPage() {
               <strong>${tax.toFixed(2)}</strong>
             </div>
 
-            <div className="discount-box">
-              <input
-                type="text"
-                placeholder="Promo code"
-              />
-
-              <button>Apply</button>
-            </div>
-
             <div className="summary-total">
               <span>Total</span>
               <strong>${total.toFixed(2)}</strong>
             </div>
 
-            <button className="place-order">
-              Place Order
+            <button
+              className="place-order"
+              onClick={handlePlaceOrder}
+              disabled={placing || products.length === 0}
+            >
+              {placing ? "Placing..." : "Place Order"}
               <FaArrowRight />
             </button>
+
+            {orderMessage === "success" && (
+              <p className="order-message success">
+                ✓ Buyurtma qabul qilindi! Rahmat.
+              </p>
+            )}
+
+            {orderMessage === "error" && (
+              <p className="order-message error">
+                Xatolik yuz berdi. Qaytadan urinib ko'ring.
+              </p>
+            )}
+
+            {orderMessage === "validation" && (
+              <p className="order-message error">
+                Iltimos, barcha majburiy maydonlarni to'ldiring.
+              </p>
+            )}
 
             <div className="secure-info">
               <FaLock />

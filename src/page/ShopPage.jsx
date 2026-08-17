@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+
 import {
   FaSearch,
   FaShoppingCart,
@@ -6,116 +9,172 @@ import {
   FaStar,
   FaSlidersH,
   FaChevronDown,
-  FaChevronLeft,
-  FaChevronRight,
-  FaThLarge,
-  FaList,
   FaCheck,
 } from "react-icons/fa";
 
 import "./ShopPage.css";
 
-const products = [
-  {
-    id: 1,
-    image:
-      "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=700&q=80",
-    title: "Black & Navy Tailored Blazer",
-    category: "Women's Clothing",
-    price: "$15.50",
-    oldPrice: "$22.00",
-    rating: 5,
-    reviews: 24,
-    badge: "SALE",
-  },
-  {
-    id: 2,
-    image:
-      "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=700&q=80",
-    title: "Premium White Shirt",
-    category: "Men's Clothing",
-    price: "$12.90",
-    oldPrice: "$18.00",
-    rating: 5,
-    reviews: 31,
-    badge: "NEW",
-  },
-  {
-    id: 3,
-    image:
-      "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=700&q=80",
-    title: "Elegant Red Dress",
-    category: "Women's Clothing",
-    price: "$18.50",
-    oldPrice: "$25.00",
-    rating: 4,
-    reviews: 18,
-    badge: "SALE",
-  },
-  {
-    id: 4,
-    image:
-      "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?auto=format&fit=crop&w=700&q=80",
-    title: "Premium Beige Jacket",
-    category: "Women's Clothing",
-    price: "$21.00",
-    oldPrice: "$29.00",
-    rating: 5,
-    reviews: 42,
-    badge: "NEW",
-  },
-  {
-    id: 5,
-    image:
-      "https://images.unsplash.com/photo-1610652492500-ded49ceeb378?auto=format&fit=crop&w=700&q=80",
-    title: "Classic Black Sweater",
-    category: "Men's Clothing",
-    price: "$14.90",
-    oldPrice: "$20.00",
-    rating: 4,
-    reviews: 16,
-    badge: "SALE",
-  },
-  {
-    id: 6,
-    image:
-      "https://images.unsplash.com/photo-1564584217132-2271feaeb3c5?auto=format&fit=crop&w=700&q=80",
-    title: "Elegant Women's Coat",
-    category: "Women's Clothing",
-    price: "$24.90",
-    oldPrice: "$32.00",
-    rating: 5,
-    reviews: 37,
-    badge: "HOT",
-  },
-];
+import {
+  getProducts,
+  getCategories,
+  subscribe,
+} from "../api.js";
+import { addToCart, getCartCount } from "../cart.js";
 
-const categories = [
-  "All Products",
-  "Men's Clothing",
-  "Women's Clothing",
-  "Kids' Clothing",
-  "Shoes",
-  "Bags",
-];
+function formatPrice(price) {
+  return `$${Number(price).toFixed(2)}`;
+}
 
 function ShopPage() {
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [search, setSearch] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [email, setEmail] = useState("");
+  const [subStatus, setSubStatus] = useState(null);
+  const [cartCount, setCartCount] = useState(getCartCount());
+  const [sortBy, setSortBy] = useState("featured");
+  const [likedProducts, setLikedProducts] = useState([]);
+
+  function toggleLiked(id) {
+    setLikedProducts((current) =>
+      current.includes(id)
+        ? current.filter((item) => item !== id)
+        : [...current, id]
+    );
+  }
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const [productData, categoryData] = await Promise.all([
+          getProducts(),
+          getCategories(),
+        ]);
+        setProducts(productData.results ?? productData);
+        setCategories(categoryData.results ?? categoryData);
+      } catch {
+        setError(
+          "Backend bilan bog'lanib bo'lmadi. Django serverini ishga tushiring."
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    const onCartUpdate = () => setCartCount(getCartCount());
+    window.addEventListener("cart-updated", onCartUpdate);
+    return () => window.removeEventListener("cart-updated", onCartUpdate);
+  }, []);
+
+  function toggleCategory(category) {
+    setSelectedCategories((current) =>
+      current.includes(category)
+        ? current.filter((item) => item !== category)
+        : [...current, category]
+    );
+  }
+
+  async function handleSearch(event) {
+    event.preventDefault();
+    setLoading(true);
+    try {
+      const data = await getProducts({ search });
+      setProducts(data.results ?? data);
+    } catch {
+      setError("Qidiruvda xatolik yuz berdi.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleApplyFilter() {
+    setLoading(true);
+    const min = Number(minPrice) || 0;
+    const max = Number(maxPrice) || Infinity;
+    const filtered = products.filter((product) => {
+      const price = Number(product.wholesale_price ?? product.price);
+      const inCategory =
+        selectedCategories.length === 0 ||
+        selectedCategories.includes(product.category);
+      return price >= min && price <= max && inCategory;
+    });
+    setProducts(filtered);
+    setLoading(false);
+  }
+
+  function handleClear() {
+    setSelectedCategories([]);
+    setMinPrice("");
+    setMaxPrice("");
+    setSearch("");
+    setSortBy("featured");
+    setLoading(true);
+    getProducts()
+      .then((data) => setProducts(data.results ?? data))
+      .catch(() => setError("Xatolik yuz berdi."))
+      .finally(() => setLoading(false));
+  }
+
+  function handleSort(value) {
+    setSortBy(value);
+    setProducts((current) => {
+      const sorted = [...current];
+      if (value === "low-high") {
+        sorted.sort(
+          (a, b) =>
+            Number(a.wholesale_price ?? a.price) -
+            Number(b.wholesale_price ?? b.price)
+        );
+      } else if (value === "high-low") {
+        sorted.sort(
+          (a, b) =>
+            Number(b.wholesale_price ?? b.price) -
+            Number(a.wholesale_price ?? a.price)
+        );
+      } else if (value === "newest") {
+        sorted.sort(
+          (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        );
+      }
+      return sorted;
+    });
+  }
+
+  async function handleSubscribe(event) {
+    event.preventDefault();
+    setSubStatus(null);
+    try {
+      await subscribe(email);
+      setSubStatus("success");
+      setEmail("");
+    } catch {
+      setSubStatus("error");
+    }
+  }
+
   return (
     <div className="shop-page">
 
       {/* HEADER */}
       <header className="shop-header">
-        <div className="shop-logo">
-          <span>Premium</span>
-          Store
-        </div>
+        <Link to="/" className="shop-logo">
+          <span>Premium</span> Store
+        </Link>
 
         <nav className="shop-nav">
-          <a href="#home">Home</a>
-          <a href="#products">Products</a>
-          <a href="#categories">Categories</a>
-          <a href="#about">About</a>
-          <a href="#contact">Contact</a>
+          <Link to="/">Home</Link>
+          <Link to="/shop">Products</Link>
+          <Link to="/#categories">Categories</Link>
+          <Link to="/#about">About</Link>
+          <Link to="/#contact">Contact</Link>
         </nav>
 
         <div className="header-actions">
@@ -127,10 +186,10 @@ function ShopPage() {
             <FaUser />
           </button>
 
-          <button className="header-icon cart-icon">
+          <Link to="/savat" className="header-icon cart-icon">
             <FaShoppingCart />
-            <span>2</span>
-          </button>
+            <span>{cartCount}</span>
+          </Link>
         </div>
       </header>
 
@@ -140,15 +199,17 @@ function ShopPage() {
           Home / <b>Shop</b>
         </span>
 
-        <div className="top-search">
+        <form className="top-search" onSubmit={handleSearch}>
           <input
             type="text"
             placeholder="Search products..."
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
           />
-          <button>
+          <button type="submit">
             <FaSearch />
           </button>
-        </div>
+        </form>
       </div>
 
       {/* SHOP CONTENT */}
@@ -163,28 +224,29 @@ function ShopPage() {
               <h3>Filters</h3>
             </div>
 
-            <button>Clear</button>
+            <button type="button" onClick={handleClear}>Clear</button>
           </div>
 
           {/* CATEGORY */}
           <div className="filter-box">
             <h4>Categories</h4>
 
-            {categories.map((category, index) => (
+            {categories.map((category) => (
               <label
                 className="check-row"
-                key={category}
+                key={category.id ?? category.name}
               >
                 <input
                   type="checkbox"
-                  defaultChecked={index === 0}
+                  checked={selectedCategories.includes(category.name)}
+                  onChange={() => toggleCategory(category.name)}
                 />
 
                 <span className="custom-check">
                   <FaCheck />
                 </span>
 
-                <span>{category}</span>
+                <span>{category.name}</span>
               </label>
             ))}
           </div>
@@ -197,6 +259,8 @@ function ShopPage() {
               <input
                 type="number"
                 placeholder="Min"
+                value={minPrice}
+                onChange={(event) => setMinPrice(event.target.value)}
               />
 
               <span>-</span>
@@ -204,41 +268,18 @@ function ShopPage() {
               <input
                 type="number"
                 placeholder="Max"
+                value={maxPrice}
+                onChange={(event) => setMaxPrice(event.target.value)}
               />
             </div>
 
-            <button className="apply-btn">
+            <button
+              type="button"
+              className="apply-btn"
+              onClick={handleApplyFilter}
+            >
               Apply Filter
             </button>
-          </div>
-
-          {/* SIZE */}
-          <div className="filter-box">
-            <h4>Size</h4>
-
-            <div className="sizes">
-              {["S", "M", "L", "XL", "XXL"].map(
-                (size) => (
-                  <button key={size}>
-                    {size}
-                  </button>
-                )
-              )}
-            </div>
-          </div>
-
-          {/* COLOR */}
-          <div className="filter-box">
-            <h4>Color</h4>
-
-            <div className="colors">
-              <button className="color black"></button>
-              <button className="color white"></button>
-              <button className="color red"></button>
-              <button className="color blue"></button>
-              <button className="color green"></button>
-              <button className="color yellow"></button>
-            </div>
           </div>
 
         </aside>
@@ -253,7 +294,7 @@ function ShopPage() {
           <div className="products-header">
 
             <div>
-              <p>Showing 1–6 of 24 products</p>
+              <p>Showing {products.length} products</p>
 
               <h1>
                 Shop Collection
@@ -262,31 +303,26 @@ function ShopPage() {
 
             <div className="products-tools">
 
-              <button className="view-button active">
-                <FaThLarge />
-              </button>
-
-              <button className="view-button">
-                <FaList />
-              </button>
-
               <div className="sort-box">
                 <span>Sort by:</span>
 
-                <select>
-                  <option>
+                <select
+                  value={sortBy}
+                  onChange={(event) => handleSort(event.target.value)}
+                >
+                  <option value="featured">
                     Featured
                   </option>
 
-                  <option>
+                  <option value="low-high">
                     Price: Low to High
                   </option>
 
-                  <option>
+                  <option value="high-low">
                     Price: High to Low
                   </option>
 
-                  <option>
+                  <option value="newest">
                     Newest
                   </option>
                 </select>
@@ -297,6 +333,10 @@ function ShopPage() {
             </div>
           </div>
 
+          {error && <p className="api-error">{error}</p>}
+
+          {loading && <p className="loading-text">Loading products...</p>}
+
           {/* PRODUCT GRID */}
           <div className="product-grid">
 
@@ -306,26 +346,39 @@ function ShopPage() {
                 key={product.id}
               >
 
-                <div className="product-image">
+                <Link
+                  to={`/mahsulodlari/${product.id}`}
+                  className="product-image"
+                >
 
                   <img
-                    src={product.image}
+                    src={product.image_url || product.image}
                     alt={product.title}
+                    onError={(event) => {
+                      event.currentTarget.src =
+                        "https://images.unsplash.com/photo-1558769132-cb1aea458c5e";
+                    }}
                   />
 
-                  <span className="product-badge">
-                    {product.badge}
-                  </span>
+                  {product.wholesale_price && (
+                    <span className="product-badge">
+                      WHOLESALE
+                    </span>
+                  )}
 
-                  <button className="heart-button">
+                  <button
+                    className={`heart-button ${
+                      likedProducts.includes(product.id) ? "active" : ""
+                    }`}
+                    onClick={(event) => {
+                      event.preventDefault();
+                      toggleLiked(product.id);
+                    }}
+                  >
                     <FaHeart />
                   </button>
 
-                  <button className="quick-view">
-                    Quick View
-                  </button>
-
-                </div>
+                </Link>
 
                 <div className="product-content">
 
@@ -345,7 +398,7 @@ function ShopPage() {
                         key={index}
                         className={
                           index <
-                          product.rating
+                          Math.round(product.rating ?? 5)
                             ? "star active"
                             : "star"
                         }
@@ -353,7 +406,7 @@ function ShopPage() {
                     ))}
 
                     <span>
-                      ({product.reviews})
+                      ({(product.reviews_count ?? 0)})
                     </span>
                   </div>
 
@@ -361,15 +414,20 @@ function ShopPage() {
 
                     <div className="prices">
                       <strong>
-                        {product.price}
+                        {formatPrice(product.wholesale_price ?? product.price)}
                       </strong>
 
-                      <del>
-                        {product.oldPrice}
-                      </del>
+                      {product.wholesale_price && (
+                        <del>
+                          {formatPrice(product.price)}
+                        </del>
+                      )}
                     </div>
 
-                    <button className="add-cart">
+                    <button
+                      className="add-cart"
+                      onClick={() => addToCart(product)}
+                    >
                       <FaShoppingCart />
                       Add
                     </button>
@@ -382,36 +440,11 @@ function ShopPage() {
 
           </div>
 
-          {/* PAGINATION */}
-          <div className="pagination">
-
-            <button>
-              <FaChevronLeft />
-            </button>
-
-            <button className="page-active">
-              1
-            </button>
-
-            <button>
-              2
-            </button>
-
-            <button>
-              3
-            </button>
-
-            <span>...</span>
-
-            <button>
-              8
-            </button>
-
-            <button>
-              <FaChevronRight />
-            </button>
-
-          </div>
+          {products.length === 0 && !loading && (
+              <p className="no-products">
+                Hech qanday mahsulot topilmadi. Filtrlarni o'zgartirib qayta urinib ko'ring.
+              </p>
+            )}
 
         </section>
       </main>
@@ -432,16 +465,34 @@ function ShopPage() {
           </p>
         </div>
 
-        <div className="newsletter-form">
+        <form
+          className="newsletter-form"
+          onSubmit={handleSubscribe}
+        >
           <input
             type="email"
+            required
             placeholder="Your email address"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
           />
 
-          <button>
+          <button type="submit">
             Subscribe
           </button>
-        </div>
+        </form>
+
+        {subStatus === "success" && (
+          <p className="sub-message success">
+            ✓ Obuna bo'ldingiz! Rahmat.
+          </p>
+        )}
+
+        {subStatus === "error" && (
+          <p className="sub-message error">
+            Xatolik yuz berdi. Qaytadan urinib ko'ring.
+          </p>
+        )}
 
       </section>
 
@@ -461,18 +512,18 @@ function ShopPage() {
 
         <div className="footer-links">
           <h3>Shop</h3>
-          <a href="#products">All Products</a>
-          <a href="#">Men</a>
-          <a href="#">Women</a>
-          <a href="#">Kids</a>
+          <Link to="/shop">All Products</Link>
+          <Link to="/shop">Men</Link>
+          <Link to="/shop">Women</Link>
+          <Link to="/shop">Kids</Link>
         </div>
 
         <div className="footer-links">
           <h3>Company</h3>
-          <a href="#">About Us</a>
-          <a href="#">Contact</a>
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms</a>
+          <Link to="/">About Us</Link>
+          <Link to="/#contact">Contact</Link>
+          <a href="#privacy">Privacy Policy</a>
+          <a href="#terms">Terms</a>
         </div>
 
         <div className="footer-links">

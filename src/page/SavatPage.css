@@ -32,6 +32,7 @@
   color: #111827;
   font-size: 19px;
   font-weight: 800;
+  text-decoration: none;
 }
 
 .checkout-logo svg {
@@ -725,6 +726,24 @@
 .empty-cart p {
   margin: 0;
   font-size: 12px;
+}
+
+.continue-shopping {
+  display: inline-block;
+  margin-top: 18px;
+  padding: 11px 22px;
+  background: #e63946;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background 0.3s, transform 0.3s;
+}
+
+.continue-shopping:hover {
+  background: #c92836;
+  transform: translateY(-2px);
 }
 
 /* RESPONSIVE */
