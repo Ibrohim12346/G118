@@ -633,12 +633,13 @@ function HomePage() {
 
           {/* USER */}
 
-          <button
+          <Link
+            to="/dashboard"
             className="icon-btn"
             title={t.user}
           >
             <FaUser />
-          </button>
+          </Link>
 
           {/* CART */}
 

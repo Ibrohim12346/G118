@@ -1,0 +1,29 @@
+{
+  "name": "odega-backend",
+  "private": true,
+  "version": "1.0.0",
+  "description": "ODEGA shop backend — Express + Mongoose (MongoDB)",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "seed": "node src/seed.js",
+    "lint": "oxlint src"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-validator": "^7.2.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.16.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
