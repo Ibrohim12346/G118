@@ -4,6 +4,7 @@ import HomePage from "./page/HomePage";
 import ShopPage from "./page/ShopPage";
 import MahsulodlariPage from "./page/MahsulodlariPage";
 import SavatPage from "./page/SavatPage";
+import AboutPage from "./page/AboutPage";
 import DashboardPage from "./page/DashboardPage";
 import SellerDashboard from "./page/SellerDashboard";
 
@@ -51,6 +52,7 @@ function App() {
           <AuthProvider>
             <Routes>
               <Route path="/" element={<HomePage />} />
+              <Route path="/about" element={<AboutPage />} />
               <Route path="/shop" element={<ShopPage />} />
               <Route path="/mahsulodlari/:id?" element={<MahsulodlariPage />} />
               <Route path="/savat" element={<SavatPage />} />
