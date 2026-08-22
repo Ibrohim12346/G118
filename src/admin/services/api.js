@@ -2,25 +2,16 @@ import axios from "axios";
 
 export const API_BASE = "/api";
 
-export function getCookie(name) {
-  const match = document.cookie.match(
-    new RegExp(`(?:^|; )${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}=([^;]*)`)
-  );
-  return match ? decodeURIComponent(match[1]) : null;
-}
-
 const api = axios.create({
   baseURL: API_BASE,
-  withCredentials: true,
   headers: { "Content-Type": "application/json" },
 });
 
 api.interceptors.request.use((config) => {
-  const csrf = getCookie("csrftoken");
-  const method = (config.method || "get").toLowerCase();
-  if (csrf && !["get", "head", "options"].includes(method)) {
+  const token = localStorage.getItem("odega_admin_token");
+  if (token) {
     config.headers = config.headers || {};
-    config.headers["X-CSRFToken"] = csrf;
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
@@ -29,7 +20,11 @@ let isRefreshing = false;
 let refreshQueue = [];
 
 async function tryRefresh() {
-  await axios.post(`${API_BASE}/auth/refresh/`, {}, { withCredentials: true });
+  const refreshToken = localStorage.getItem("odega_admin_refresh_token");
+  if (!refreshToken) throw new Error("No refresh token");
+  const { data } = await axios.post(`${API_BASE}/auth/refresh`, { refreshToken });
+  localStorage.setItem("odega_admin_token", data.data.accessToken);
+  localStorage.setItem("odega_admin_refresh_token", data.data.refreshToken);
 }
 
 api.interceptors.response.use(
@@ -73,6 +68,8 @@ api.interceptors.response.use(
         !path.startsWith("/admin/forgot-password") &&
         !path.startsWith("/admin/reset-password");
       if (isProtectedAdmin) {
+        localStorage.removeItem("odega_admin_token");
+        localStorage.removeItem("odega_admin_refresh_token");
         window.location.assign("/admin/login");
       }
       return Promise.reject(refreshError);

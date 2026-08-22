@@ -1,0 +1,527 @@
+/* =========================================================
+   REGISTER PAGE STYLES - macOS STYLE
+======================================================= */
+
+:root {
+  --bg-light: #f5f5f7;
+  --bg-dark: #0d0d0f;
+  --card-light: #ffffff;
+  --card-dark: #1c1c1e;
+  --border-light: #e5e5e6;
+  --border-dark: #3a3a3c;
+  --text-light: #1d1d1f;
+  --text-dark: #f5f5f7;
+  --accent: #ff3b30;
+  --accent-hover: #cc2a20;
+  --success: #34c38f;
+  --placeholder-light: #86868b;
+  --placeholder-dark: #a0a0a0;
+}
+
+/* Dark mode overrides */
+html.dark-mode {
+  --bg-light: #0d0d0f;
+  --bg-dark: #0d0d0f;
+  --card-light: #1c1c1e;
+  --card-dark: #1c1c1e;
+  --border-light: #3a3a3c;
+  --border-dark: #3a3a3c;
+  --text-light: #f5f5f7;
+  --text-dark: #f5f5f7;
+}
+
+/* =========================================================
+   REGISTER PAGE ROOT
+======================================================= */
+
+.register-page {
+  min-height: 100vh;
+  width: 100%;
+  background: var(--bg-light);
+  color: var(--text-light);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+html.dark-mode .register-page {
+  background: var(--bg-dark);
+  color: var(--text-dark);
+}
+
+/* =========================================================
+   MACOS WINDOW
+======================================================= */
+
+.macos-window {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  margin: 40px auto;
+  background: var(--card-light);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  transition: all 0.3s ease;
+}
+
+html.dark-mode .macos-window {
+  background: var(--card-dark);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Traffic Light Buttons */
+.traffic-light {
+  display: flex;
+  gap: 4px;
+  padding: 8px 12px;
+  background: var(--bg-light);
+  border-bottom: 1px solid var(--border-light);
+}
+
+html.dark-mode .traffic-light {
+  background: var(--bg-dark);
+  border-color: var(--border-dark);
+}
+
+.light {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.light-red {
+  background: #ff3b30;
+  box-shadow: 0 0 6px rgba(255, 59, 48, 0.5);
+}
+
+.light-yellow {
+  background: #ffb400;
+  box-shadow: 0 0 6px rgba(255, 180, 0, 0.5);
+}
+
+.light-green {
+  background: #34c38f;
+  box-shadow: 0 0 6px rgba(52, 195, 143, 0.5);
+}
+
+/* =========================================================
+   WINDOW HEADER
+======================================================= */
+
+.window-header {
+  display: flex;
+  align-items: center;
+  padding: 20px 24px 12px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+html.dark-mode .window-header {
+  border-color: var(--border-dark);
+}
+
+.window-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-light);
+  letter-spacing: -0.3px;
+}
+
+/* =========================================================
+   FORM CONTAINER
+======================================================= */
+
+.form-container {
+  padding: 0 24px 24px;
+}
+
+.welcome-text {
+  font-size: 14px;
+  color: #86868b;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+/* =========================================================
+   INPUT GROUPS
+======================================================= */
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-icon {
+  width: 20px;
+  height: 20px;
+  color: #86868b;
+  flex-shrink: 0;
+  margin-right: 12px;
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toggle-password {
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: #86868b;
+  font-size: 16px;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.toggle-password:hover {
+  color: var(--accent);
+}
+
+.input {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 15px;
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--text-light);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+html.dark-mode .input {
+  background: rgba(28, 28, 30, 0.8);
+  border-color: var(--border-dark);
+  color: var(--text-dark);
+}
+
+.input::placeholder {
+  color: var(--placeholder-light);
+}
+
+html.dark-mode .input::placeholder {
+  color: var(--placeholder-dark);
+}
+
+.input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.1);
+}
+
+.strength-indicator {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #86868b;
+}
+
+.strength-indicator strong {
+  color: var(--accent);
+}
+
+/* Error message */
+.error-message {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #ff3b30;
+}
+
+/* =========================================================
+   TERMS GROUP
+======================================================= */
+
+.terms-group {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #86868b;
+}
+
+html.dark-mode .terms-group span {
+  color: var(--placeholder-dark);
+}
+
+.terms-checkbox {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-right: 8px;
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+html.dark-mode .terms-checkbox {
+  border-color: var(--border-dark);
+}
+
+/* =========================================================
+   REGISTER BUTTON
+======================================================= */
+
+.register-btn {
+  width: 100%;
+  padding: 14px;
+  margin-top: 24px;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  background: var(--accent);
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.register-btn:hover:not(:disabled) {
+  transform: scale(1.02);
+  box-shadow: 0 8px 20px rgba(255, 59, 48, 0.3);
+  background: var(--accent-hover);
+}
+
+.register-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.register-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.register-btn.loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.register-btn.loading::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}
+
+/* =========================================================
+   LOGIN LINK
+======================================================= */
+
+.login-link {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 13px;
+  color: #86868b;
+}
+
+html.dark-mode .login-link {
+  color: var(--placeholder-dark);
+}
+
+.login-link a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}
+
+/* =========================================================
+   SOCIAL AUTH
+======================================================= */
+
+.social-auth {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.social-btn {
+  flex: 1;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  background: white;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+html.dark-mode .social-btn {
+  border-color: var(--border-dark);
+  background: var(--card-dark);
+  color: var(--text-dark);
+}
+
+.social-btn:hover {
+  border-color: var(--accent);
+  background: rgba(255, 59, 48, 0.1);
+}
+
+html.dark-mode .social-btn:hover {
+  background: rgba(255, 59, 48, 0.2);
+}
+
+.social-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   AUTH VISUAL (RIGHT SIDE)
+======================================================= */
+
+.auth-visual {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .auth-visual {
+    display: block;
+  }
+}
+
+.auth-visual.hidden {
+  display: none;
+}
+
+.visual-bg {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+  pointer-events: none;
+}
+
+html.dark-mode .visual-bg {
+  background: linear-gradient(135deg, rgba(28, 28, 30, 0.3), transparent);
+}
+
+.visual-cards {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px;
+}
+
+.visual-card {
+  background: var(--card-light);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  transition: transform 0.3s, box-shadow 0.3s;
+  border: 1px solid var(--border-light);
+}
+
+html.dark-mode .visual-card {
+  background: var(--card-dark);
+  border-color: var(--border-dark);
+}
+
+.visual-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+}
+
+html.dark-mode .visual-card:hover {
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+}
+
+.visual-icon {
+  width: 32px;
+  height: 32px;
+  margin: 0 auto 12px;
+  color: var(--accent);
+}
+
+.visual-card h4 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.visual-card p {
+  font-size: 12px;
+  color: #86868b;
+  margin: 0;
+}
+
+/* =========================================================
+   RESPONSIVE
+======================================================= */
+
+@media (max-width: 767px) {
+  .macos-window {
+    max-width: 100%;
+    margin: 20px 0;
+    border-radius: 20px;
+  }
+
+  .traffic-light {
+    display: none;
+  }
+
+  .form-container {
+    padding: 0 16px 16px;
+  }
+
+  .window-header {
+    padding: 16px 16px 8px;
+  }
+
+  .window-title {
+    font-size: 18px;
+  }
+
+  .welcome-text {
+    font-size: 12px;
+    margin-bottom: 16px;
+  }
+
+  .register-btn {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .social-auth {
+    flex-direction: column;
+  }
+
+  .social-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .macos-window {
+    border-radius: 16px;
+  }
+}

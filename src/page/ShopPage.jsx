@@ -55,11 +55,11 @@ function ShopPage() {
           getProducts(),
           getCategories(),
         ]);
-        setProducts(productData.results ?? productData);
-        setCategories(categoryData.results ?? categoryData);
+        setProducts(productData.data?.items ?? productData.data ?? []);
+        setCategories(categoryData.data?.items ?? categoryData.data ?? []);
       } catch {
         setError(
-          "Backend bilan bog'lanib bo'lmadi. Django serverini ishga tushiring."
+          "Backend bilan bog'lanib bo'lmadi. Serverni ishga tushiring."
         );
       } finally {
         setLoading(false);
@@ -87,7 +87,7 @@ function ShopPage() {
     setLoading(true);
     try {
       const data = await getProducts({ search });
-      setProducts(data.results ?? data);
+      setProducts(data.data?.items ?? data.data ?? []);
     } catch {
       setError("Qidiruvda xatolik yuz berdi.");
     } finally {
@@ -118,7 +118,7 @@ function ShopPage() {
     setSortBy("featured");
     setLoading(true);
     getProducts()
-      .then((data) => setProducts(data.results ?? data))
+      .then((data) => setProducts(data.data?.items ?? data.data ?? []))
       .catch(() => setError("Xatolik yuz berdi."))
       .finally(() => setLoading(false));
   }

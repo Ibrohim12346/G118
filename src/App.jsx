@@ -7,6 +7,8 @@ import SavatPage from "./page/SavatPage";
 import AboutPage from "./page/AboutPage";
 import DashboardPage from "./page/DashboardPage";
 import SellerDashboard from "./page/SellerDashboard";
+import RegisterPage from "./page/RegisterPage";
+import UserLoginPage from "./page/LoginPage";
 
 import { AuthProvider } from "./admin/auth/AuthContext";
 import ProtectedRoute from "./admin/auth/ProtectedRoute";
@@ -58,6 +60,8 @@ function App() {
               <Route path="/savat" element={<SavatPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/seller" element={<SellerDashboard />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/login" element={<UserLoginPage />} />
 
               <Route path="/admin/login" element={<LoginPage />} />
               <Route path="/admin/forgot-password" element={<ForgotPasswordPage />} />

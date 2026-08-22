@@ -49,7 +49,7 @@ export default function ProductPage() {
 
     if (!id) {
       getProducts()
-        .then((data) => setProducts(data.results ?? data ?? []))
+        .then((data) => setProducts(data.data?.items ?? data.data ?? []))
         .catch(() => setError("Mahsulotlar yuklanmadi. Backend mavjud emas."))
         .finally(() => setLoading(false));
       return;
@@ -57,7 +57,7 @@ export default function ProductPage() {
 
     getProduct(id)
       .then((data) => {
-        setProduct(data);
+        setProduct(data.data);
       })
       .catch(() => setError("Mahsulot topilmadi yoki backend mavjud emas."))
       .finally(() => setLoading(false));

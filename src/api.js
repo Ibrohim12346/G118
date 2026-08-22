@@ -10,7 +10,7 @@ async function request(path, options = {}) {
 
   if (!res.ok) {
     const message =
-      (data && (data.detail || data.email || data.non_field_errors)) ||
+      (data && (data.message || data.detail || data.email || data.non_field_errors)) ||
       "Something went wrong";
     throw new Error(Array.isArray(message) ? message[0] : message);
   }
@@ -20,31 +20,35 @@ async function request(path, options = {}) {
 
 export function getProducts(params = {}) {
   const qs = new URLSearchParams(params).toString();
-  return request(`/products/${qs ? `?${qs}` : ""}`);
+  return request(`/products${qs ? `?${qs}` : ""}`);
 }
 
 export function getProduct(id) {
-  return request(`/products/${id}/`);
+  return request(`/products/${id}`);
+}
+
+export function getProductBySlug(slug) {
+  return request(`/products/slug/${slug}`);
 }
 
 export function getCategories() {
   return request("/categories/");
 }
 
-export function getReviews() {
-  return request("/reviews/");
-}
-
-export function subscribe(email) {
-  return request("/subscribers/", {
-    method: "POST",
-    body: JSON.stringify({ email }),
-  });
+export function getCategory(id) {
+  return request(`/categories/${id}`);
 }
 
 export function createOrder(order) {
   return request("/orders/", {
     method: "POST",
     body: JSON.stringify(order),
+  });
+}
+
+export function subscribe(email) {
+  return request("/subscribers/", {
+    method: "POST",
+    body: JSON.stringify({ email }),
   });
 }

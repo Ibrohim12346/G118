@@ -1,62 +1,14 @@
 import { useEffect, useState } from "react";
 import "./HomePage.css";
 import { Link } from "react-router-dom";
+import { FaSearch, FaShoppingCart, FaTruck, FaTags, FaStar, FaArrowRight, FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn, FaPhoneAlt, FaEnvelope, FaMapMarkerAlt, FaHeart, FaUser, FaBars, FaMoon, FaSun, FaTimes, FaGlobe, FaShieldAlt, FaHeadset, FaCheck, FaTelegramPlane, FaYoutube } from "react-icons/fa";
 
-import {
-  FaSearch,
-  FaShoppingCart,
-  FaTruck,
-  FaTags,
-  FaStar,
-  FaArrowRight,
-  FaFacebookF,
-  FaTwitter,
-  FaInstagram,
-  FaLinkedinIn,
-  FaPhoneAlt,
-  FaEnvelope,
-  FaMapMarkerAlt,
-  FaHeart,
-  FaUser,
-  FaCheck,
-  FaBars,
-  FaMoon,
-  FaSun,
-  FaGlobe,
-  FaTimes,
-} from "react-icons/fa";
-
-import {
-  getProducts,
-  getCategories,
-  getReviews,
-  subscribe,
-} from "../api.js";
-
+import { getProducts, getCategories, subscribe } from "../api.js";
 import { getCartCount } from "../cart.js";
 
 /* =========================================================
-   FEATURES
-========================================================= */
-
-const features = [
-  {
-    icon: <FaTruck />,
-    key: "fastDelivery",
-  },
-  {
-    icon: <FaTags />,
-    key: "bestPrice",
-  },
-  {
-    icon: <FaStar />,
-    key: "premiumQuality",
-  },
-];
-
-/* =========================================================
    TRANSLATIONS
-========================================================= */
+======================================================= */
 
 const translations = {
   uz: {
@@ -65,189 +17,52 @@ const translations = {
     shop: "Do‘kon",
     cart: "Savat",
 
-    wholesaleFashion: "OPTOM SAVDO",
-    heroTitle: "Premium do‘kon kiyimlari.",
-    heroTitle2: "Keng ko‘lamda yetkazib beriladi.",
-    heroText:
-      "Sifatli kiyimlar — ulgurji narxlarda. Do‘konlar, chakana savdo va bizneslar uchun.",
-    viewProducts: "Mahsulotlarni ko‘rish",
-    contactUs: "Bog‘lanish",
-
-    fastDelivery: "Tezkor yetkazib berish",
-    fastDeliveryText:
-      "Ulgurji buyurtmalar uchun tezkor va ishonchli yetkazib berish xizmatini taqdim etamiz.",
-
-    bestPrice: "Eng yaxshi ulgurji narx",
-    bestPriceText:
-      "Biznes va katta hajmdagi xaridorlar uchun qulay va maqbul narxlar.",
-
-    premiumQuality: "Yuqori sifat",
-    premiumQualityText:
-      "Mijozlarimiz uchun sinchkovlik bilan tanlangan yuqori sifatli mahsulotlar.",
-
-    shopByCategory: "KATEGORIYA BO‘YICHA",
-    wholesaleCategories: "Ulgurji toifalar",
-    explore: "Ko‘rish",
-
-    ourCollection: "BIZNING TO‘PLAM",
-    topWholesaleProducts: "Eng yaxshi ulgurji mahsulotlar",
-    viewAll: "Barchasini ko‘rish",
-    wholesale: "OPTOM",
-
-    whatCustomersSay: "MIJOZLARIMIZ FIKRI",
-    customerReviews: "Mijozlar sharhlari",
-    verifiedCustomer: "Tasdiqlangan mijoz",
-
-    premiumWholesale: "PREMIUM ULgurji",
-    readyToGrow: "Biznesingizni rivojlantirishga tayyormisiz?",
-    growText:
-      "Raqobatbardosh ulgurji narxlarda sifatli kiyimlarni oling va biznesingizni biz bilan rivojlantiring.",
-    enterEmail: "Email manzilingizni kiriting",
-    getStarted: "Boshlash",
-    subscribeSuccess: "✓ Obuna bo‘ldingiz! Rahmat.",
-    subscribeError: "Xatolik yuz berdi. Qaytadan urinib ko‘ring.",
-
-    quickLinks: "Tezkor havolalar",
-    company: "Kompaniya",
-    aboutUs: "Biz haqimizda",
-    contact: "Aloqa",
-    privacyPolicy: "Maxfiylik siyosati",
-    terms: "Shartlar",
-
-    contactTitle: "Aloqa",
-    trustedPartner:
-      "Sizning ishonchli ulgurji kiyim hamkoringiz. Yuqori sifatli kiyimlar katta hajmda yetkazib beriladi.",
-
-    allRights: "Barcha huquqlar himoyalangan.",
-
-    search: "Qidirish",
-    user: "Profil",
-    language: "Til",
-    darkMode: "Tungi rejim",
-    lightMode: "Kunduzgi rejim",
-
-    loading: "Mahsulotlar yuklanmoqda...",
-    backendError:
-      "Backend bilan bog‘lanib bo‘lmadi. Django serverini ishga tushiring.",
-  },
-
-  ru: {
-    home: "Главная",
-    products: "Товары",
-    shop: "Магазин",
-    cart: "Корзина",
-
-    wholesaleFashion: "ОПТОВАЯ ПРОДАЖА",
-    heroTitle: "Одежда Premium магазина.",
-    heroTitle2: "Доставка в больших объёмах.",
-    heroText:
-      "Качественная одежда по оптовым ценам. Для магазинов, розничной торговли и бизнеса.",
-    viewProducts: "Посмотреть товары",
-    contactUs: "Связаться",
-
-    fastDelivery: "Быстрая доставка",
-    fastDeliveryText:
-      "Мы предлагаем быструю и надёжную доставку оптовых заказов.",
-
-    bestPrice: "Лучшая оптовая цена",
-    bestPriceText:
-      "Выгодные цены для бизнеса и покупателей, приобретающих товары оптом.",
-
-    premiumQuality: "Премиальное качество",
-    premiumQualityText:
-      "Высококачественные товары, тщательно отобранные для наших клиентов.",
-
-    shopByCategory: "ПО КАТЕГОРИЯМ",
-    wholesaleCategories: "Оптовые категории",
-    explore: "Смотреть",
-
-    ourCollection: "НАША КОЛЛЕКЦИЯ",
-    topWholesaleProducts: "Лучшие оптовые товары",
-    viewAll: "Смотреть все",
-    wholesale: "ОПТ",
-
-    whatCustomersSay: "ОТЗЫВЫ КЛИЕНТОВ",
-    customerReviews: "Отзывы клиентов",
-    verifiedCustomer: "Проверенный клиент",
-
-    premiumWholesale: "ПРЕМИАЛЬНЫЙ ОПТ",
-    readyToGrow: "Готовы развивать свой бизнес?",
-    growText:
-      "Получайте качественную одежду по выгодным оптовым ценам и развивайте свой бизнес вместе с нами.",
-    enterEmail: "Введите ваш email",
-    getStarted: "Начать",
-    subscribeSuccess: "✓ Вы подписались! Спасибо.",
-    subscribeError: "Произошла ошибка. Попробуйте ещё раз.",
-
-    quickLinks: "Быстрые ссылки",
-    company: "Компания",
-    aboutUs: "О нас",
-    contact: "Контакты",
-    privacyPolicy: "Политика конфиденциальности",
-    terms: "Условия",
-
-    contactTitle: "Контакты",
-    trustedPartner:
-      "Ваш надёжный партнёр по оптовой продаже одежды. Качественная одежда с доставкой в больших объёмах.",
-
-    allRights: "Все права защищены.",
-
-    search: "Поиск",
-    user: "Профиль",
-    language: "Язык",
-    darkMode: "Тёмная тема",
-    lightMode: "Светлая тема",
-
-    loading: "Загрузка товаров...",
-    backendError:
-      "Не удалось подключиться к серверу. Запустите Django сервер.",
-  },
-
-  en: {
-    home: "Home",
-    products: "Products",
-    shop: "Shop",
-    cart: "Cart",
-
-    wholesaleFashion: "WHOLESALE FASHION",
-    heroTitle: "Premium Store Apparel.",
-    heroTitle2: "Delivered at Scale.",
-    heroText:
-      "Quality clothing at wholesale prices. Built for retailers, stores and businesses.",
-    viewProducts: "View Products",
-    contactUs: "Contact Us",
+    heroTitle: "Discover Your Perfect Style",
+    heroText: "Quality products, modern design and the best shopping experience.",
+    shopNow: "Shop Now",
+    exploreCollection: "Explore Collection",
 
     fastDelivery: "Fast Delivery",
-    fastDeliveryText:
-      "We provide fast and reliable delivery for wholesale orders.",
-
-    bestPrice: "Best Wholesale Price",
-    bestPriceText:
-      "Affordable prices for businesses and bulk buyers.",
+    fastDeliveryText: "Fast and reliable delivery for wholesale orders.",
 
     premiumQuality: "Premium Quality",
-    premiumQualityText:
-      "High-quality products carefully selected for our customers.",
+    premiumQualityText: "High-quality products carefully selected for our customers.",
+
+    securePayment: "Secure Payment",
+    securePaymentText: "Safe and encrypted payment gateways for every order.",
+
+    support_24_7: "24/7 Support",
+    support_24_7Text: "Always here to help - friendly customer support around the clock.",
 
     shopByCategory: "SHOP BY CATEGORY",
-    wholesaleCategories: "Wholesale Categories",
     explore: "Explore",
 
     ourCollection: "OUR COLLECTION",
-    topWholesaleProducts: "Top Wholesale Products",
+    topProducts: "Top Products",
     viewAll: "View All",
-    wholesale: "WHOLESALE",
 
-    whatCustomersSay: "WHAT OUR CUSTOMERS SAY",
+    whyChooseUs: "WHY CHOOSE US?",
+    fastDeliveryTitle: "Fast Delivery",
+    fastDeliveryDesc: "We provide fast and reliable delivery for wholesale orders.",
+    premiumQualityTitle: "Premium Quality",
+    premiumQualityDesc: "High-quality products carefully selected for our customers.",
+    securePaymentTitle: "Secure Payment",
+    securePaymentDesc: "Safe and encrypted payment gateways for every order.",
+    support_24_7Title: "24/7 Support",
+    support_24_7Desc: "Always here to help - friendly customer support around the clock.",
+
+    specialOffer: "SPECIAL OFFER",
+    discount: "Up to 50% OFF",
+    countdown: "Countdown",
+    ctaShop: "Shop Collection",
+
+    testimonials: "CUSTOMER REVIEWS",
     customerReviews: "Customer Reviews",
     verifiedCustomer: "Verified Customer",
 
-    premiumWholesale: "PREMIUM WHOLESALE",
-    readyToGrow: "Ready to Grow Your Business?",
-    growText:
-      "Get premium apparel at competitive wholesale prices and grow your business with us.",
+    newsletter: "STAY UPDATED",
     enterEmail: "Enter your email",
-    getStarted: "Get Started",
+    subscribe: "Subscribe",
     subscribeSuccess: "✓ You are subscribed! Thank you.",
     subscribeError: "Something went wrong. Please try again.",
 
@@ -259,8 +74,7 @@ const translations = {
     terms: "Terms",
 
     contactTitle: "Contact",
-    trustedPartner:
-      "Your trusted wholesale clothing partner. Premium quality apparel delivered at scale.",
+    trustedPartner: "Your trusted wholesale clothing partner. Premium quality apparel delivered at scale.",
 
     allRights: "All Rights Reserved.",
 
@@ -271,8 +85,84 @@ const translations = {
     lightMode: "Light Mode",
 
     loading: "Loading products...",
-    backendError:
-      "Could not connect to the backend. Please start the Django server.",
+    backendError: "Could not connect to the backend. Please start the Django server.",
+  },
+
+  en: {
+    home: "Home",
+    products: "Products",
+    shop: "Shop",
+    cart: "Cart",
+
+    heroTitle: "Discover Your Perfect Style",
+    heroText: "Quality products, modern design and the best shopping experience.",
+    shopNow: "Shop Now",
+    exploreCollection: "Explore Collection",
+
+    fastDelivery: "Fast Delivery",
+    fastDeliveryText: "We provide fast and reliable delivery for wholesale orders.",
+
+    premiumQuality: "Premium Quality",
+    premiumQualityText: "High-quality products carefully selected for our customers.",
+
+    securePayment: "Secure Payment",
+    securePaymentText: "Safe and encrypted payment gateways for every order.",
+
+    support_24_7: "24/7 Support",
+    support_24_7Text: "Always here to help - friendly customer support around the clock.",
+
+    shopByCategory: "SHOP BY CATEGORY",
+    explore: "Explore",
+
+    ourCollection: "OUR COLLECTION",
+    topProducts: "Top Products",
+    viewAll: "View All",
+
+    whyChooseUs: "WHY CHOOSE US?",
+    fastDeliveryTitle: "Fast Delivery",
+    fastDeliveryDesc: "We provide fast and reliable delivery for wholesale orders.",
+    premiumQualityTitle: "Premium Quality",
+    premiumQualityDesc: "High-quality products carefully selected for our customers.",
+    securePaymentTitle: "Secure Payment",
+    securePaymentDesc: "Safe and encrypted payment gateways for every order.",
+    support_24_7Title: "24/7 Support",
+    support_24_7Desc: "Always here to help - friendly customer support around the clock.",
+
+    specialOffer: "SPECIAL OFFER",
+    discount: "Up to 50% OFF",
+    countdown: "Countdown",
+    ctaShop: "Shop Collection",
+
+    testimonials: "CUSTOMER REVIEWS",
+    customerReviews: "Customer Reviews",
+    verifiedCustomer: "Verified Customer",
+
+    newsletter: "STAY UPDATED",
+    enterEmail: "Enter your email",
+    subscribe: "Subscribe",
+    subscribeSuccess: "✓ You are subscribed! Thank you.",
+    subscribeError: "Something went wrong. Please try again.",
+
+    quickLinks: "Quick Links",
+    company: "Company",
+    aboutUs: "About Us",
+    contact: "Contact",
+    privacyPolicy: "Privacy Policy",
+    terms: "Terms",
+
+    contactTitle: "Contact",
+    trustedPartner: "Your trusted wholesale clothing partner. Premium quality apparel delivered at scale.",
+
+    allRights: "All Rights Reserved.",
+
+    search: "Search",
+    user: "Profile",
+    language: "Language",
+    darkMode: "Dark Mode",
+    lightMode: "Light Mode",
+
+    loading: "Loading products...",
+    backendError: "Could not connect to the backend. Please start the Django server.",
   },
 
   tr: {
@@ -281,45 +171,52 @@ const translations = {
     shop: "Mağaza",
     cart: "Sepet",
 
-    wholesaleFashion: "TOPTAN SATIŞ",
-    heroTitle: "Premium Mağaza Giyim.",
-    heroTitle2: "Büyük Ölçekte Teslimat.",
-    heroText:
-      "Toptan fiyatlarla kaliteli giyim. Mağazalar, perakendeciler ve işletmeler için.",
-    viewProducts: "Ürünleri Gör",
-    contactUs: "İletişim",
+    heroTitle: "Discover Your Perfect Style",
+    heroText: "Quality products, modern design and the best shopping experience.",
+    shopNow: "Shop Now",
+    exploreCollection: "Explore Collection",
 
     fastDelivery: "Hızlı Teslimat",
-    fastDeliveryText:
-      "Toptan siparişler için hızlı ve güvenilir teslimat sağlıyoruz.",
-
-    bestPrice: "En İyi Toptan Fiyat",
-    bestPriceText:
-      "İşletmeler ve toplu alıcılar için uygun fiyatlar.",
+    fastDeliveryText: "Toptan siparişler için hızlı ve güvenilir teslimat sağlıyoruz.",
 
     premiumQuality: "Premium Kalite",
-    premiumQualityText:
-      "Müşterilerimiz için özenle seçilmiş yüksek kaliteli ürünler.",
+    premiumQualityText: "Müşterilerimiz için özenle seçilmiş yüksek kaliteli ürünler.",
+
+    securePayment: "Güvenli Ödeme",
+    securePaymentText: "Her sipariş için güvenli şifreli ödeme gateway'leri.",
+
+    support_24_7: "24/7 Destek",
+    support_24_7Text: "Her zaman yardımcı oluyuz - her zaman dostça destek.",
 
     shopByCategory: "KATEGORİYE GÖRE",
-    wholesaleCategories: "Toptan Kategoriler",
     explore: "Keşfet",
 
     ourCollection: "KOLEKSİYONUMUZ",
-    topWholesaleProducts: "En İyi Toptan Ürünler",
+    topProducts: "En İyi Ürünler",
     viewAll: "Tümünü Gör",
-    wholesale: "TOPTAN",
 
-    whatCustomersSay: "MÜŞTERİLERİMİZ NE DİYOR",
+    whyChooseUs: "Nİ NESNE?",
+    fastDeliveryTitle: "Hızlı Teslimat",
+    fastDeliveryDesc: "Toptan siparişler için hızlı ve güvenilir teslimat sağlıyoruz.",
+    premiumQualityTitle: "Premium Kalite",
+    premiumQualityDesc: "Müşterilerimiz için özenle seçilmiş yüksek kaliteli ürünler.",
+    securePaymentTitle: "Güvenli Ödeme",
+    securePaymentDesc: "Her sipariş için güvenli şifreli ödeme gateway'leri.",
+    support_24_7Title: "24/7 Destek",
+    support_24_7Desc: "Her zaman yardımcı oluyuz - her zaman dostça destek.",
+
+    specialOffer: "ÖZEL TEKLIF",
+    discount: "Aday %50 İNDİR",
+    countdown: "Sayaç",
+    ctaShop: "Collection'ı Al",
+
+    testimonials: "MÜŞTERİ YORUMLARI",
     customerReviews: "Müşteri Yorumları",
     verifiedCustomer: "Doğrulanmış Müşteri",
 
-    premiumWholesale: "PREMİUM TOPTAN",
-    readyToGrow: "İşletmenizi büyütmeye hazır mısınız?",
-    growText:
-      "Rekabetçi toptan fiyatlarla kaliteli giyim alın ve işletmenizi bizimle büyütün.",
+    newsletter: "AYRICA BİLGİLENDİR",
     enterEmail: "E-posta adresinizi girin",
-    getStarted: "Başla",
+    subscribe: "Abone Ol",
     subscribeSuccess: "✓ Abone oldunuz! Teşekkürler.",
     subscribeError: "Bir hata oluştu. Lütfen tekrar deneyin.",
 
@@ -331,8 +228,7 @@ const translations = {
     terms: "Şartlar",
 
     contactTitle: "İletişim",
-    trustedPartner:
-      "Güvenilir toptan giyim ortağınız. Premium kaliteli giyim ürünleri büyük ölçekte teslim edilir.",
+    trustedPartner: "Güvenilir toptan giyim ortağınız. Premium kaliteli giyim ürünleri büyük ölçekte teslim edilir.",
 
     allRights: "Tüm Hakları Saklıdır.",
 
@@ -343,22 +239,21 @@ const translations = {
     lightMode: "Aydınlık Mod",
 
     loading: "Ürünler yükleniyor...",
-    backendError:
-      "Backend sunucusuna bağlanılamadı. Django sunucusunu başlatın.",
+    backendError: "Backend sunucusuna bağlanılamadı. Django sunucusunu başlatın.",
   },
 };
 
 /* =========================================================
-   PRICE
-========================================================= */
+   PRICE FORMATTER
+======================================================= */
 
 function formatPrice(price) {
   return `$${Number(price).toFixed(2)}`;
 }
 
 /* =========================================================
-   HOME PAGE
-========================================================= */
+   HOME PAGE COMPONENT
+======================================================= */
 
 function HomePage() {
   /* =========================
@@ -403,19 +298,14 @@ function HomePage() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [
-          productData,
-          categoryData,
-          reviewData,
-        ] = await Promise.all([
+        const [productData, categoryData] = await Promise.all([
           getProducts({ featured: "true" }),
           getCategories(),
-          getReviews(),
         ]);
 
-        setProducts(productData.results ?? productData);
-        setCategories(categoryData.results ?? categoryData);
-        setCustomerReviews(reviewData.results ?? reviewData);
+        setProducts(productData.data?.items ?? productData.data ?? []);
+        setCategories(categoryData.data?.items ?? categoryData.data ?? []);
+        setCustomerReviews([]);
       } catch {
         setError(t.backendError);
       } finally {
@@ -511,6 +401,12 @@ function HomePage() {
       .includes(searchText.toLowerCase())
   );
 
+  /* =========================
+     PRODUCTS ARRAY (for Featured Products)
+  ========================= */
+
+  const featuredProducts = products.slice(0, 8);
+
   /* =========================================================
      RETURN
   ========================================================= */
@@ -522,7 +418,7 @@ function HomePage() {
       }`}
     >
       {/* =====================================================
-          HEADER
+         HEADER
       ===================================================== */}
 
       <header className="header">
@@ -536,7 +432,7 @@ function HomePage() {
         {/* NAVIGATION */}
 
         <nav>
-          <Link to="/">
+          <Link to="/" className="active">
             {t.home}
           </Link>
 
@@ -676,7 +572,7 @@ function HomePage() {
       </header>
 
       {/* =====================================================
-          SEARCH PANEL
+         SEARCH PANEL
       ===================================================== */}
 
       <div
@@ -750,7 +646,7 @@ function HomePage() {
       </div>
 
       {/* =====================================================
-          MOBILE MENU
+         MOBILE MENU
       ===================================================== */}
 
       <div
@@ -846,7 +742,7 @@ function HomePage() {
       </div>
 
       {/* =====================================================
-          HERO
+         HERO SECTION
       ===================================================== */}
 
       <section
@@ -878,7 +774,7 @@ function HomePage() {
               to="/mahsulodlari"
               className="primary-btn"
             >
-              {t.viewProducts}
+              {t.shopNow}
 
               <FaArrowRight />
             </Link>
@@ -887,9 +783,9 @@ function HomePage() {
               href="#contact"
               className="secondary-btn"
             >
-              {t.contactUs}
+              {t.exploreCollection}
 
-              <FaPhoneAlt />
+              <FaArrowRight />
             </a>
 
           </div>
@@ -899,49 +795,126 @@ function HomePage() {
       </section>
 
       {/* =====================================================
-          FEATURES
+         FEATURES SECTION
       ===================================================== */}
 
       <section className="features">
 
-        {features.map(
-          (item, index) => {
+        <div className="section-title">
 
-            const title =
-              t[item.key];
+          <span>
+            {t.whyChooseUs}
+          </span>
 
-            const text =
-              t[
-                `${item.key}Text`
-              ];
+          <h2>
+            {t.shopByCategory}
+          </h2>
 
-            return (
-              <div
-                className="feature-card"
-                key={index}
-              >
+        </div>
 
-                <div className="feature-icon">
-                  {item.icon}
-                </div>
+        <div className="feature-grid">
 
-                <h3>
-                  {title}
-                </h3>
+          {/* Fast Delivery */}
 
-                <p>
-                  {text}
-                </p>
+          <div
+            className="feature-card"
+            style={{
+              transition: "transform 0.4s ease, box-shadow 0.4s ease"
+            }}
+          >
 
-              </div>
-            );
-          }
-        )}
+            <div className="feature-icon">
+              <FaTruck />
+            </div>
+
+            <h3>
+              {t.fastDeliveryTitle}
+            </h3>
+
+            <p>
+              {t.fastDeliveryDesc}
+            </p>
+
+          </div>
+
+          {/* Premium Quality */}
+
+          <div
+            className="feature-card"
+            style={{
+              transition: "transform 0.4s ease, box-shadow 0.4s ease",
+              animationDelay: "0.1s"
+            }}
+          >
+
+            <div className="feature-icon">
+              <FaStar />
+            </div>
+
+            <h3>
+              {t.premiumQualityTitle}
+            </h3>
+
+            <p>
+              {t.premiumQualityDesc}
+            </p>
+
+          </div>
+
+          {/* Secure Payment */}
+
+          <div
+            className="feature-card"
+            style={{
+              transition: "transform 0.4s ease, box-shadow 0.4s ease",
+              animationDelay: "0.2s"
+            }}
+          >
+
+            <div className="feature-icon">
+              <FaShieldAlt />
+            </div>
+
+            <h3>
+              {t.securePaymentTitle}
+            </h3>
+
+            <p>
+              {t.securePaymentDesc}
+            </p>
+
+          </div>
+
+          {/* 24/7 Support */}
+
+          <div
+            className="feature-card"
+            style={{
+              transition: "transform 0.4s ease, box-shadow 0.4s ease",
+              animationDelay: "0.3s"
+            }}
+          >
+
+            <div className="feature-icon">
+              <FaHeadset />
+            </div>
+
+            <h3>
+              {t.support_24_7Title}
+            </h3>
+
+            <p>
+              {t.support_24_7Desc}
+            </p>
+
+          </div>
+
+        </div>
 
       </section>
 
       {/* =====================================================
-          CATEGORIES
+         CATEGORIES SECTION
       ===================================================== */}
 
       <section
@@ -964,45 +937,49 @@ function HomePage() {
         <div className="category-grid">
 
           {categories.map(
-            (category, index) => (
+            (category, index) => {
 
-              <div
-                className={`category-card category-${
-                  index + 1
-                }`}
-                key={
-                  category.id ??
-                  index
-                }
-              >
+              return (
 
-                <div className="category-overlay"></div>
+                <div
+                  className={`category-card category-${
+                    index + 1
+                  }`}
+                  key={
+                    category.id ??
+                    index
+                  }
+                >
 
-                <div className="category-content">
+                  <div className="category-overlay"></div>
 
-                  <span>
-                    {String(
-                      index + 1
-                    ).padStart(2, "0")}
-                  </span>
+                  <div className="category-content">
 
-                  <h3>
-                    {category.name}
-                  </h3>
+                    <span>
+                      {String(
+                        index + 1
+                      ).padStart(2, "0")}
+                    </span>
 
-                  <Link to="/shop">
+                    <h3>
+                      {category.name}
+                    </h3>
 
-                    {t.explore}
+                    <Link to="/shop">
 
-                    <FaArrowRight />
+                      {t.explore}
 
-                  </Link>
+                      <FaArrowRight />
+
+                    </Link>
+
+                  </div>
 
                 </div>
 
-              </div>
+              )
 
-            )
+            }
           )}
 
         </div>
@@ -1010,7 +987,7 @@ function HomePage() {
       </section>
 
       {/* =====================================================
-          PRODUCTS
+         FEATURED PRODUCTS SECTION
       ===================================================== */}
 
       <section
@@ -1027,7 +1004,7 @@ function HomePage() {
             </span>
 
             <h2>
-              {t.topWholesaleProducts}
+              {t.topProducts}
             </h2>
 
           </div>
@@ -1064,131 +1041,141 @@ function HomePage() {
 
         <div className="product-grid">
 
-          {filteredProducts.map(
-            (product, index) => (
+          {featuredProducts.map(
+            (product, index) => {
 
-              <Link
-                to={`/mahsulodlari/${product.id}`}
-                className="product-card"
-                key={
-                  product.id ??
-                  index
-                }
-              >
+              return (
 
-                {/* IMAGE */}
+                <Link
+                  to={`/mahsulodlari/${product.id}`}
+                  className="product-card"
+                  key={
+                    product.id ??
+                    index
+                  }
+                >
 
-                <div className="product-image">
+                  {/* IMAGE */}
 
-                  <img
-                    src={
-                      product.image_url ||
-                      product.image
-                    }
-                    alt={
-                      product.title
-                    }
-                    onError={(
-                      event
-                    ) => {
-                      event.currentTarget.src =
-                        "https://images.unsplash.com/photo-1558769132-cb1aea458c5e";
-                    }}
-                  />
+                  <div className="product-image">
 
-                  <span className="badge">
-                    {t.wholesale}
-                  </span>
+                    <img
+                      src={
+                        product.image_url ||
+                        product.image
+                      }
+                      alt={
+                        product.title
+                      }
+                      onError={(
+                        event
+                      ) => {
+                        event.currentTarget.src =
+                          "https://images.unsplash.com/photo-1558769132-cb1aea458c5e";
+                      }}
+                    />
 
-                  <button
-                    className="product-heart"
-                    onClick={(event) => {
-                      event.preventDefault();
-                    }}
-                    aria-label="Favorite"
-                  >
-                    <FaHeart />
-                  </button>
-
-                </div>
-
-                {/* PRODUCT INFO */}
-
-                <div className="product-info">
-
-                  <span className="product-category">
-                    {product.category}
-                  </span>
-
-                  <h3>
-                    {product.title}
-                  </h3>
-
-                  {/* RATING */}
-
-                  <div className="product-rating">
-
-                    {Array.from({
-                      length: 5,
-                    }).map(
-                      (
-                        _,
-                        starIndex
-                      ) => (
-
-                        <FaStar
-                          key={
-                            starIndex
-                          }
-                          className={
-                            starIndex <
-                            Math.round(
-                              product.rating ??
-                                5
-                            )
-                              ? "star active"
-                              : "star"
-                          }
-                        />
-
-                      )
-                    )}
-
-                    <span>
-                      {(
-                        product.rating ??
-                        5
-                      ).toFixed(1)}
+                    <span className="badge">
+                      {t.wholesale}
                     </span>
+
+                    <button
+                      className="product-heart"
+                      onClick={(event) => {
+                        event.preventDefault();
+                      }}
+                      aria-label="Favorite"
+                    >
+                      <FaHeart />
+                    </button>
 
                   </div>
 
-                  {/* PRICE */}
+                  {/* PRODUCT INFO */}
 
-                  <div className="product-bottom">
+                  <div className="product-info">
 
-                    <strong>
-                      {formatPrice(
-                        product.wholesale_price ??
-                          product.price
+                    <span className="product-category">
+                      {product.category}
+                    </span>
+
+                    <h3>
+                      {product.title}
+                    </h3>
+
+                    {/* RATING */}
+
+                    <div className="product-rating">
+
+                      {Array.from({
+                        length: 5,
+                      }).map(
+                        (
+                          _,
+                          starIndex
+                        ) => (
+
+                          <FaStar
+                            key={
+                              starIndex
+                            }
+                            className={
+                              starIndex <
+                              Math.round(
+                                product.rating ??
+                                  5
+                              )
+                                ? "star active"
+                                : "star"
+                            }
+                          />
+
+                        )
                       )}
-                    </strong>
 
-                    <span className="view-btn">
+                      <span>
+                        {(
+                          product.rating ??
+                          5
+                        ).toFixed(1)}
+                      </span>
 
-                      {t.viewProducts}
+                    </div>
 
-                      <FaArrowRight />
+                    {/* PRICE */}
 
-                    </span>
+                    <div className="product-bottom">
+
+                      <strong>
+                        {formatPrice(
+                          product.wholesale_price ??
+                            product.price
+                        )}
+                      </strong>
+
+                      {product.discount > 0 && (
+                        <span className="discount-badge">
+                          -{product.discount}%
+                        </span>
+                      )}
+
+                      <span className="view-btn">
+
+                        {t.viewProducts}
+
+                        <FaArrowRight />
+
+                      </span>
+
+                    </div>
 
                   </div>
 
-                </div>
+                </Link>
 
-              </Link>
+              )
 
-            )
+            }
           )}
 
         </div>
@@ -1196,200 +1183,203 @@ function HomePage() {
       </section>
 
       {/* =====================================================
-          REVIEWS
+         PROMO BANNER SECTION
       ===================================================== */}
 
       <section
-        className="reviews"
-        id="reviews"
+        className="promo-banner"
       >
 
-        <div className="section-title">
+        <div className="banner-content">
 
           <span>
-            {t.whatCustomersSay}
+            {t.summerCollection}
           </span>
 
-          <h2>
-            {t.customerReviews}
-          </h2>
+          {/* <h2>
+            {t.upTo50%OFF}
+          </h2> */}
 
-        </div>
+          <a
+            href="#products"
+            className="banner-btn"
+          >
+            {t.shopCollection}
 
-        <div className="review-grid">
-
-          {customerReviews.map(
-            (
-              review,
-              index
-            ) => (
-
-              <div
-                className="review-card"
-                key={
-                  review.id ??
-                  index
-                }
-              >
-
-                {/* STARS */}
-
-                <div className="stars">
-
-                  {Array.from({
-                    length: 5,
-                  }).map(
-                    (
-                      _,
-                      starIndex
-                    ) => (
-
-                      <FaStar
-                        key={
-                          starIndex
-                        }
-                        className={
-                          starIndex <
-                          Math.round(
-                            review.rating ??
-                              5
-                          )
-                            ? "active"
-                            : ""
-                        }
-                      />
-
-                    )
-                  )}
-
-                </div>
-
-                {/* TEXT */}
-
-                <p>
-                  "{review.text}"
-                </p>
-
-                {/* USER */}
-
-                <div className="review-user">
-
-                  <div className="avatar">
-                    {review.name?.charAt(
-                      0
-                    )}
-                  </div>
-
-                  <div>
-
-                    <strong>
-                      {review.name}
-                    </strong>
-
-                    <span>
-
-                      <FaCheck />
-
-                      {t.verifiedCustomer}
-
-                    </span>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-            )
-          )}
+            <FaArrowRight />
+          </a>
 
         </div>
 
       </section>
 
       {/* =====================================================
-          CTA
+         SPECIAL OFFER SECTION
       ===================================================== */}
 
-      <form
-        className="cta"
-        onSubmit={
-          handleSubscribe
-        }
+      <section
+        className="special-offer"
       >
 
-        <div className="cta-content">
+        <div className="offer-countdown">
 
           <span>
-            {t.premiumWholesale}
+            {t.discount}
           </span>
 
-          <h2>
-            {t.readyToGrow}
-          </h2>
+          <div className="countdown-timer" id="countdownTimer">
 
-          <p>
-            {t.growText}
-          </p>
+            <div className="countdown-item">
 
-        </div>
+              <span className="countdown-value" data-days>
+                00
+              </span>
 
-        <div className="cta-form">
+              <span className="countdown-label">
+                {t.days}
+              </span>
 
-          <div className="email-input">
+            </div>
 
-            <FaEnvelope />
+            <div className="countdown-item">
 
-            <input
-              type="email"
-              required
-              placeholder={
-                t.enterEmail
-              }
-              value={email}
-              onChange={(
-                event
-              ) =>
-                setEmail(
-                  event.target.value
-                )
-              }
-            />
+              <span className="countdown-value" data-hours>
+                00
+              </span>
+
+              <span className="countdown-label">
+                {t.hours}
+              </span>
+
+            </div>
+
+            <div className="countdown-item">
+
+              <span className="countdown-value" data-minutes>
+                00
+              </span>
+
+              <span className="countdown-label">
+                {t.minutes}
+              </span>
+
+            </div>
+
+            <div className="countdown-item">
+
+              <span className="countdown-value" data-seconds>
+                00
+              </span>
+
+              <span className="countdown-label">
+                {t.seconds}
+              </span>
+
+            </div>
 
           </div>
 
-          <button type="submit">
+        </div>
 
-            {t.getStarted}
+        <div className="offer-cta">
+
+          <a
+            href="#products"
+            className="cta-button"
+          >
+            {t.ctaShop}
 
             <FaArrowRight />
-
-          </button>
+          </a>
 
         </div>
 
-        {/* SUCCESS */}
-
-        {subStatus ===
-          "success" && (
-          <p className="sub-message success">
-            {t.subscribeSuccess}
-          </p>
-        )}
-
-        {/* ERROR */}
-
-        {subStatus ===
-          "error" && (
-          <p className="sub-message error">
-            {t.subscribeError}
-          </p>
-        )}
-
-      </form>
+      </section>
 
       {/* =====================================================
-          FOOTER
+         TESTIMONIALS SECTION
+      ===================================================== */}
+      <section className="reviews" id="reviews">
+        <div className="section-title">
+          <span>{t.testimonials}</span>
+          <h2>{t.customerReviews}</h2>
+        </div>
+
+        <div className="review-carousel">
+          {customerReviews.map((review, index) => (
+            <div className="review-card" key={review.id ?? index}>
+              <div className="stars">
+                {Array.from({ length: 5 }).map((_, starIndex) => (
+                  <FaStar
+                    key={starIndex}
+                    className={
+                      starIndex < Math.round(review.rating ?? 5)
+                        ? "active"
+                        : ""
+                    }
+                  />
+                ))}
+              </div>
+
+              <p>"{review.text}"</p>
+
+              <div className="review-user">
+                <div className="avatar">
+                  {review.name?.charAt(0)}
+                </div>
+                <div>
+                  <strong>{review.name}</strong>
+                  <span>
+                    <FaCheck />
+                    {t.verifiedCustomer}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* =====================================================
+         NEWSLETTER SECTION
+      ===================================================== */}
+      <section className="newsletter">
+        <div className="newsletter-content">
+          <span>{t.stayUpdated}</span>
+          <h2>{t.subscribeTitle}</h2>
+
+          <form className="newsletter-form" onSubmit={handleSubscribe}>
+            <div className="email-input">
+              <FaEnvelope />
+              <input
+                type="email"
+                required
+                placeholder={t.enterEmail}
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                pattern=".+@.+\\..+"
+                title="Please enter a valid email address"
+              />
+            </div>
+
+            <button type="submit">
+              {t.subscribe}
+              <FaArrowRight />
+            </button>
+          </form>
+
+          {subStatus === "success" && (
+            <p className="sub-message success">{t.subscribeSuccess}</p>
+          )}
+
+          {subStatus === "error" && (
+            <p className="sub-message error">{t.subscribeError}</p>
+          )}
+        </div>
+      </section>
+
+      {/* =====================================================
+         FOOTER
       ===================================================== */}
 
       <footer
@@ -1404,6 +1394,7 @@ function HomePage() {
           <div className="footer-about">
 
             <div className="footer-logo">
+
               <span>
                 Premium
               </span>{" "}
@@ -1420,20 +1411,6 @@ function HomePage() {
 
               <a
                 href="#"
-                aria-label="Facebook"
-              >
-                <FaFacebookF />
-              </a>
-
-              <a
-                href="#"
-                aria-label="Twitter"
-              >
-                <FaTwitter />
-              </a>
-
-              <a
-                href="#"
                 aria-label="Instagram"
               >
                 <FaInstagram />
@@ -1441,9 +1418,23 @@ function HomePage() {
 
               <a
                 href="#"
-                aria-label="LinkedIn"
+                aria-label="Telegram"
               >
-                <FaLinkedinIn />
+                <FaTelegramPlane />
+              </a>
+
+              <a
+                href="#"
+                aria-label="Facebook"
+              >
+                <FaFacebookF />
+              </a>
+
+              <a
+                href="#"
+                aria-label="YouTube"
+              >
+                <FaYoutube />
               </a>
 
             </div>
@@ -1476,27 +1467,23 @@ function HomePage() {
 
           </div>
 
-          {/* COMPANY */}
+          {/* CUSTOMER SERVICE */}
 
           <div className="footer-column">
 
             <h3>
-              {t.company}
+              {t.customerService}
             </h3>
-
-            <Link to="/about">
-              {t.aboutUs}
-            </Link>
 
             <a href="#contact">
               {t.contact}
             </a>
 
-            <a href="#contact">
+            <a href="#privacyPolicy">
               {t.privacyPolicy}
             </a>
 
-            <a href="#contact">
+            <a href="#terms">
               {t.terms}
             </a>
 

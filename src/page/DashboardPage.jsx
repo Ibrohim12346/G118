@@ -835,17 +835,17 @@ export default function DashboardPage() {
   useEffect(() => {
     let cancelled = false;
 
-    (async () => {
-      try {
-        const data = await getProducts();
-        const list = data.results ?? data ?? [];
-        if (!cancelled) setFavorites(Array.isArray(list) ? list : []);
-      } catch {
-        if (!cancelled) setFavorites(MOCK_PRODUCTS);
-      } finally {
-        if (!cancelled) setFavLoading(false);
-      }
-    })();
+(async () => {
+        try {
+          const data = await getProducts();
+          const list = data.data?.items ?? data.data ?? [];
+          if (!cancelled) setFavorites(Array.isArray(list) ? list : []);
+        } catch {
+          if (!cancelled) setFavorites(MOCK_PRODUCTS);
+        } finally {
+          if (!cancelled) setFavLoading(false);
+        }
+      })();
 
     return () => {
       cancelled = true;

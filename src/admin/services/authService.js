@@ -1,4 +1,4 @@
-import api from "../services/api";
+import api from "./api";
 
 export function extractErrorMessage(error, fallback = "Nimadir xato ketdi.") {
   if (!error.response || error.response.status === 0 || error.response.status === 502 || error.response.status === 504) {
@@ -24,66 +24,78 @@ export function extractErrorMessage(error, fallback = "Nimadir xato ketdi.") {
   return fallback;
 }
 
-export async function fetchCsrf() {
-  return api.get("/auth/csrf/");
-}
-
 export async function loginRequest({ email, password, remember }) {
-  const { data } = await api.post("/auth/login/", { email, password, remember: !!remember });
+  const { data } = await api.post("/auth/login", { email, password, remember: !!remember });
+  localStorage.setItem("odega_admin_token", data.data.accessToken);
+  localStorage.setItem("odega_admin_refresh_token", data.data.refreshToken);
   return data;
 }
 
 export async function logoutRequest() {
-  const { data } = await api.post("/auth/logout/");
-  return data;
+  const refreshToken = localStorage.getItem("odega_admin_refresh_token");
+  if (refreshToken) {
+    try {
+      await api.post("/auth/logout", { refreshToken });
+    } catch {
+      // ignore
+    }
+  }
+  localStorage.removeItem("odega_admin_token");
+  localStorage.removeItem("odega_admin_refresh_token");
+  return { success: true };
 }
 
 export async function getMeRequest() {
-  const { data } = await api.get("/auth/me/");
+  const { data } = await api.get("/auth/me");
   return data;
 }
 
 export async function refreshRequest() {
-  const { data } = await api.post("/auth/refresh/");
+  const refreshToken = localStorage.getItem("odega_admin_refresh_token");
+  const { data } = await api.post("/auth/refresh", { refreshToken });
+  localStorage.setItem("odega_admin_token", data.data.accessToken);
+  localStorage.setItem("odega_admin_refresh_token", data.data.refreshToken);
   return data;
 }
 
 export async function registerRequest(payload) {
-  const { data } = await api.post("/auth/register/", payload);
+  const { data } = await api.post("/auth/register", payload);
+  localStorage.setItem("odega_admin_token", data.data.accessToken);
+  localStorage.setItem("odega_admin_refresh_token", data.data.refreshToken);
   return data;
 }
 
 export async function forgotPasswordRequest(email) {
-  const { data } = await api.post("/auth/forgot-password/", { email });
+  const { data } = await api.post("/auth/forgot-password", { email });
   return data;
 }
 
 export async function resetPasswordRequest(payload) {
-  const { data } = await api.post("/auth/reset-password/", payload);
+  const { data } = await api.post("/auth/reset-password", payload);
   return data;
 }
 
 export async function changePasswordRequest(payload) {
-  const { data } = await api.post("/auth/change-password/", payload);
+  const { data } = await api.post("/auth/change-password", payload);
   return data;
 }
 
 export async function getUsersRequest(params = {}) {
-  const { data } = await api.get("/auth/users/", { params });
+  const { data } = await api.get("/users", { params });
   return data;
 }
 
 export async function updateUserRequest(userId, payload) {
-  const { data } = await api.patch(`/auth/users/${userId}/`, payload);
+  const { data } = await api.patch(`/users/${userId}`, payload);
   return data;
 }
 
 export async function deleteUserRequest(userId) {
-  const { data } = await api.delete(`/auth/users/${userId}/`);
+  const { data } = await api.delete(`/users/${userId}`);
   return data;
 }
 
 export async function getStatsRequest() {
-  const { data } = await api.get("/admin/stats/");
+  const { data } = await api.get("/stats");
   return data;
 }

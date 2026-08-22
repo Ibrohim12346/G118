@@ -1,0 +1,1 @@
+import('vite').then(v => v.default(['--config', 'src/vite.config.js', 'dev'])).then(() => {}).catch(e => console.error(e.message))
